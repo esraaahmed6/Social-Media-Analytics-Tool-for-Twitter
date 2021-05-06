@@ -2,12 +2,11 @@
 
 from kafka import KafkaProducer
 from datetime import datetime
-import secret_config as conf ## where I put my Twitter API keys
 import tweepy
 import sys
 import re
 
-TWEET_TOPICS = ['pizza']
+TWEET_TOPICS = ['covid19']
 
 KAFKA_BROKER = '172.18.0.2:6667'
 KAFKA_TOPIC = 'test1'
@@ -31,12 +30,13 @@ class Streamer(tweepy.StreamListener):
 
         print(f'[{d.hour}:{d.minute}.{d.second}] sending tweet')
 
-# put your API keys here
-consumer_key = "c96inYn2hJJbpj8IbjiL938U2"
-consumer_secret_key = "rhDTAoptCceazgVzHx8uXGh6nh3qQqQfa7BzcoV93lYZBvAGSD"
+# put API keys here
+consumer_key = "wHGi2BtgLE5cGSn3AmAWl4QPd"
+consumer_secret_key = "gPIyjlqhRX7Fh70l973n1qZxG7WJBWnx98sW2RKYgWrI04ogFp"
 
-access_token = "1385705262842056707-wEq45Oi9WmYLv1lB8TV8M31GDBvQ6j"
-access_token_secret = "zps9ZQL9oCLelAIRrXq8YM5LTRbrXkcgGeh6Xs2FBFLrI"
+access_token = "1385679347428872192-DVdTE8zU7IvAhD57sD3eGkh8Wl2vtG"
+access_token_secret = "lnOnD4q6545sSb01QcMDUxaYQJtRfF5Hh5rILcgOmKIGS"
+
 
 auth = tweepy.OAuthHandler(consumer_key, consumer_secret_key)
 auth.set_access_token(access_token, access_token_secret)
