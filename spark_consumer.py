@@ -23,14 +23,22 @@ def polarity_detection(text):
 def subjectivity_detection(text):
     return TextBlob(text).sentiment.subjectivity
 def text_classification(words):
-    # polarity detection
-    polarity_detection_udf = udf(polarity_detection, StringType())
-    words = words.withColumn("polarity", polarity_detection_udf("word"))
-    # subjectivity detection
-    subjectivity_detection_udf = udf(subjectivity_detection, StringType())
-    words = words.withColumn("subjectivity", subjectivity_detection_udf("word"))
-    return words
-    
+    #polarity detection
+     polarity_detection_udf = udf(polarity_detection, StringType())
+     words = words.withColumn("polarity", polarity_detection_udf("word"))
+    #subjectivity detection
+     subjectivity_detection_udf = udf(subjectivity_detection, StringType())
+     words = words.withColumn("subjectivity", subjectivity_detection_udf("word"))
+     return words
+# sentiment Type    
+def sentiment_analysis(tweet_text):
+    analysis = TextBlob(tweet_text)
+    if analysis.sentiment.polarity > 0:
+       return 'positive'
+    elif analysis.sentiment.polarity == 0:
+         return 'neutral'           
+    else:
+        return 'negative'    
     
 # reply to tweets method    
     
@@ -47,10 +55,10 @@ def reply_to_tweet(tweet):
 if __name__ == "__main__":
 
     #reply on tweets
-    consumer_key = "HgMvQsFRLSCnNsWZKzAWCC8sa"
-    consumer_secret_key = "aNc1QlRFWN0jpG5DWCjh6ib5KRPBMOI3uQYEKMH4kPH4JdzilS"
-    access_token = "1385696117938077700-2jxnaoZYujojv9kS7Se1Pegkjfr7Vj"
-    access_token_secret = "74KlJAkFvCdQJ5MclE8xUbzadtweTPfnmHE8H6MXdkoaP"
+    consumer_key = "oKHLc1OEtFqDmes3rzx7axFxH"
+    consumer_secret_key = "8uDv2Wxcp9GCFFbv7V9GwmOZ1PtFylEYGNplYIWDfejrLu0Gsj"
+    access_token = "1385696117938077700-baAP81Eor9jNoZ8sbwWKx7serPVntU"
+    access_token_secret = "lu4dUyb6O2yfhRFiX3dt9kKMTefAVT9q6vS7cbr1jhfMT"
  
     auth = tweepy.OAuthHandler(consumer_key, consumer_secret_key)
     auth.set_access_token(access_token, access_token_secret)
@@ -62,9 +70,8 @@ if __name__ == "__main__":
     spark.conf.set("spark.sql.parquet.compression.codec", "gzip")
     
     #To avoid unncessary logs
-    #spark.setLogLevel("WARN")
-    
-   
+    #spark.setLogLevel("WARN")   
+
     
     # Subscribe to test1 topic 
     lines = spark.readStream.format("kafka").option("kafka.bootstrap.servers", "172.18.0.2:6667").option("subscribe", "test1").load()
@@ -75,7 +82,8 @@ if __name__ == "__main__":
     
     # text classification to define polarity and subjectivity
     words = text_classification(words)    
-    words = words.withColumn('sentiment',when( words.polarity >= 0, "positive").otherwise("negative"))
+    udf_sentiment = udf(sentiment_analysis, StringType())
+    words = words.withColumn('sentiment',udf_sentiment('tweet'))    
     words = words.repartition(1)   
     reply_query = words.writeStream.foreach(reply_to_tweet).start()
     
